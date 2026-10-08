@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Color Trading Analyzer — Demo</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#080b12;color:#e9eef8;font-family:Arial,sans-serif}
+.wrap{max-width:520px;margin:auto;padding:18px}
+.card{background:#111725;border:1px solid #263149;border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:0 10px 30px #0005}
+h1{font-size:24px;margin:4px 0 6px}
+.sub{color:#91a0b9;font-size:13px}
+.warn{background:#3a2110;border:1px solid #8d5220;color:#ffc98d;padding:11px;border-radius:12px;font-size:13px;line-height:1.45}
+.buttons{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:12px}
+button{border:0;border-radius:12px;padding:13px 8px;font-weight:700;color:white;cursor:pointer}
+.red{background:#e53935}.green{background:#16a765}.violet{background:#7b4dff}
+.secondary{background:#273148}.danger{background:#7d2630}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.stat{background:#0c111d;border-radius:12px;padding:12px;text-align:center}
+.num{font-size:22px;font-weight:800}.label{font-size:11px;color:#8491a8}
+.bar{height:10px;background:#252d3d;border-radius:20px;overflow:hidden;margin:7px 0 12px}
+.fill{height:100%;transition:.3s}
+.history{display:flex;flex-wrap:wrap;gap:7px}
+.dot{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:9px;border-bottom:1px solid #252d3d;text-align:left}
+.pred{font-size:22px;font-weight:800;margin:6px 0}
+.small{font-size:12px;color:#8491a8;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <h1>🎨 Color Trading Analyzer</h1>
+    <div class="sub">Educational / Demo tool — no real hacking</div>
+  </div>
+
+  <div class="card warn">
+    ⚠️ यह tool किसी असली color-trading platform को hack, manipulate या guaranteed prediction नहीं करता। Probability केवल आपके डाले हुए पुराने data का statistical analysis है।
+  </div>
+
+  <div class="card">
+    <b>Result जोड़ें</b>
+    <div class="buttons">
+      <button class="red" onclick="add('Red')">🔴 RED</button>
+      <button class="green" onclick="add('Green')">🟢 GREEN</button>
+      <button class="violet" onclick="add('Violet')">🟣 VIOLET</button>
+    </div>
+    <div class="buttons">
+      <button class="secondary" onclick="undo()">↩ Undo</button>
+      <button class="danger" onclick="clearAll()">🗑 Clear</button>
+      <button class="secondary" onclick="demo()">Demo Data</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <b>Statistics</b><br><br>
+    <div class="stats">
+      <div class="stat"><div id="total" class="num">0</div><div class="label">TOTAL</div></div>
+      <div class="stat"><div id="redN" class="num">0</div><div class="label">RED</div></div>
+      <div class="stat"><div id="greenN" class="num">0</div><div class="label">GREEN</div></div>
+    </div>
+    <br>
+    <div class="stat"><div id="violetN" class="num">0</div><div class="label">VIOLET</div></div>
+  </div>
+
+  <div class="card">
+    <b>Frequency</b>
+    <p>🔴 Red <span id="rp">0%</span></p><div class="bar"><div id="rb" class="fill red" style="width:0"></div></div>
+    <p>🟢 Green <span id="gp">0%</span></p><div class="bar"><div id="gb" class="fill green" style="width:0"></div></div>
+    <p>🟣 Violet <span id="vp">0%</span></p><div class="bar"><div id="vb" class="fill violet" style="width:0"></div></div>
+  </div>
+
+  <div class="card">
+    <b>Demo statistical indicator</b>
+    <div id="prediction" class="pred">—</div>
+    <div class="small">यह अगले result की भविष्यवाणी या guarantee नहीं है। Random game में पिछला result अगले result को तय नहीं करता।</div>
+  </div>
+
+  <div class="card">
+    <b>Current Streak</b>
+    <div id="streak" class="pred">—</div>
+  </div>
+
+  <div class="card">
+    <b>History (latest first)</b>
+    <div id="history" class="history"></div>
+  </div>
+</div>
+
+<script>
+let data=JSON.parse(localStorage.getItem('colorDemo')||'[]');
+
+function add(x){data.push(x);save();render()}
+function undo(){data.pop();save();render()}
+function clearAll(){data=[];save();render()}
+function save(){localStorage.setItem('colorDemo',JSON.stringify(data))}
+function pct(n,t){return t?Math.round(n/t*100):0}
+function demo(){
+  data=['Red','Green','Green','Violet','Red','Red','Green','Violet','Green','Red','Green','Green','Violet','Red','Green'];
+  save();render()
+}
+function render(){
+  let t=data.length,r=data.filter(x=>x==='Red').length,g=data.filter(x=>x==='Green').length,v=data.filter(x=>x==='Violet').length;
+  total.textContent=t;redN.textContent=r;greenN.textContent=g;violetN.textContent=v;
+  let rpct=pct(r,t),gpct=pct(g,t),vpct=pct(v,t);
+  rp.textContent=rpct+'%';gp.textContent=gpct+'%';vp.textContent=vpct+'%';
+  rb.style.width=rpct+'%';gb.style.width=gpct+'%';vb.style.width=vpct+'%';
+
+  if(t){
+    let arr=[['🔴 RED',r],['🟢 GREEN',g],['🟣 VIOLET',v]].sort((a,b)=>b[1]-a[1]);
+    prediction.textContent=arr[0][0]+' — historical frequency highest';
+  }else prediction.textContent='—';
+
+  if(t){
+    let last=data[t-1],n=0;
+    for(let i=t-1;i>=0&&data[i]===last;i--)n++;
+    streak.textContent=(last==='Red'?'🔴 ':last==='Green'?'🟢 ':'🟣 ')+last+' × '+n;
+  }else streak.textContent='—';
+
+  history.innerHTML=data.slice().reverse().map((x,i)=>{
+    let c=x==='Red'?'red':x==='Green'?'green':'violet';
+    return `<div class="dot ${c}" title="${x}">${x[0]}</div>`
+  }).join('');
+}
+render();
+</script>
+</body>
+</html>
